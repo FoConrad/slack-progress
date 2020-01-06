@@ -1,13 +1,19 @@
+import sys
 import time
 
 from slacker import Slacker
 
+def python(is_major=0):
+    ret = abs(sys.version_info.major - is_major)
+    return ret if ret > 1 else not bool(ret)
 
 class SlackProgress(object):
     def __init__(self, token, channel, suffix='%'):
         self.suffix = suffix
         self.channel = channel
         self.slack = Slacker(token)
+
+        self.chr = chr if python(is_major=3) else unichr
 
     def new(self, total=100):
         """
@@ -38,8 +44,8 @@ class SlackProgress(object):
         self.slack.chat.update(chan, msg_ts, content)
 
     def _makebar(self, pos):
-        bar = (round(pos / 5) * chr(9608))
-        return '{} {}{}'.format(bar, pos, self.suffix)
+        bar = (int(round(pos / 5)) * self.chr(9608))
+        return u'{} {}{}'.format(bar, pos, self.suffix)
 
 
 class ProgressBar(object):
@@ -61,7 +67,7 @@ class ProgressBar(object):
     @done.setter
     def done(self, val):
         self._done = val
-        self.pos = round((val/self.total) * 100)
+        self.pos = round((float(val)/self.total) * 100)
 
     @property
     def pos(self):
